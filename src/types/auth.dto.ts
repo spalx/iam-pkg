@@ -5,6 +5,11 @@ export interface AuthenticateDTO {
   password: string;
 }
 
+export const AuthenticateDTOSchema = z.object({
+  identity: z.string(),
+  password: z.string(),
+});
+
 export interface CreateTokenDTO {
   identity: string;
   password?: string;
