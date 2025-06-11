@@ -6,8 +6,15 @@ export interface AuthenticateDTO {
 }
 
 export const AuthenticateDTOSchema = z.object({
-  identity: z.string(),
-  password: z.string(),
+  identity: z.string({
+    required_error: "identity is required",
+    invalid_type_error: "identity must be a string"
+  }).min(1, "identity cannot be empty"),
+
+  password: z.string({
+    required_error: "password is required",
+    invalid_type_error: "password must be a string"
+  }).min(1, "password cannot be empty"),
 });
 
 export interface CreateTokenDTO {
@@ -17,9 +24,26 @@ export interface CreateTokenDTO {
 }
 
 export const CreateTokenDTOSchema = z.object({
-  client: z.string(),
-  password: z.string().optional(),
-  code: z.string().optional(),
+  identity: z.string({
+    required_error: "identity is required",
+    invalid_type_error: "identity must be a string"
+  }).min(1, "identity cannot be empty"),
+
+  password: z.string({
+    invalid_type_error: "password must be a string"
+  })
+  .optional()
+  .refine(val => val === undefined || val.trim() !== '', {
+    message: "password cannot be empty",
+  }),
+
+  code: z.string({
+    invalid_type_error: "code must be a string"
+  })
+  .optional()
+  .refine(val => val === undefined || val.trim() !== '', {
+    message: "code cannot be empty",
+  }),
 });
 
 export interface DidCreateTokenDTO {
@@ -32,7 +56,10 @@ export interface RefreshTokenDTO {
 }
 
 export const RefreshTokenDTOSchema = z.object({
-  refresh_token: z.string(),
+  refresh_token: z.string({
+    required_error: "refresh_token is required",
+    invalid_type_error: "refresh_token must be a string"
+  }).min(1, "refresh_token cannot be empty"),
 });
 
 export interface DidRefreshTokenDTO {
