@@ -1,3 +1,3 @@
 export enum IAMAction {
-  CreateToken = 'CreateToken',
+  CreateToken = 'iam.createToken',
 }
