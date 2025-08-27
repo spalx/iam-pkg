@@ -6,7 +6,7 @@ export interface RoleEntityDTO {
 
 export interface UserEntityDTO {
   id: string;
-  identity: string;
+  identities: string[];
   user_roles: RoleEntityDTO[];
   meta: Record<string, unknown>;
 }
