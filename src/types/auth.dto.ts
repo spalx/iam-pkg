@@ -30,15 +30,14 @@ export const AuthenticateDTOSchema = z.object({
 });
 
 export interface DidAuthenticateDTO {
-  mfa_code?: string;
+  challenge_id: string;
 }
 
 export interface CreateTokenDTO {
   client_id: string;
   client_secret: string;
   identity: string;
-  password?: string;
-  mfa_code?: string;
+  password: string;
 }
 
 export const CreateTokenDTOSchema = z.object({
@@ -58,20 +57,26 @@ export const CreateTokenDTOSchema = z.object({
   }).min(1, "identity cannot be empty"),
 
   password: z.string({
+    required_error: "password is required",
     invalid_type_error: "password must be a string"
-  })
-  .optional()
-  .refine(val => val === undefined || val.trim() !== '', {
-    message: "password cannot be empty",
-  }),
+  }).min(1, "password cannot be empty"),
+});
+
+export interface CreateMFATokenDTO {
+  challenge_id: string;
+  mfa_code: string;
+}
+
+export const CreateMFATokenDTOSchema = z.object({
+  challenge_id: z.string({
+    required_error: "challenge_id is required",
+    invalid_type_error: "challenge_id must be a string"
+  }).min(1, "challenge_id cannot be empty"),
 
   mfa_code: z.string({
-    invalid_type_error: "code must be a string"
-  })
-  .optional()
-  .refine(val => val === undefined || val.trim() !== '', {
-    message: "code cannot be empty",
-  }),
+    required_error: "mfa_code is required",
+    invalid_type_error: "mfa_code must be a string"
+  }).min(1, "mfa_code cannot be empty"),
 });
 
 export interface DidCreateTokenDTO {
