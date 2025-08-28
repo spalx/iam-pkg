@@ -107,6 +107,7 @@ export interface RevokeTokenDTO {
 }
 
 export interface DidRevokeTokenDTO {
+  //
 }
 
 export const RevokeTokenDTOSchema = z.object({
