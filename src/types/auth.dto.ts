@@ -106,6 +106,9 @@ export interface RevokeTokenDTO {
   refresh_token: string;
 }
 
+export interface DidRevokeTokenDTO {
+}
+
 export const RevokeTokenDTOSchema = z.object({
   refresh_token: z.string({
     required_error: "refresh_token is required",
