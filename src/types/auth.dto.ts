@@ -30,6 +30,7 @@ export const AuthenticateDTOSchema = z.object({
 });
 
 export interface DidAuthenticateDTO {
+  mfa_code: string;
   challenge_id: string;
 }
 
