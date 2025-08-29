@@ -4,7 +4,7 @@ export interface AuthenticateDTO {
   client_id: string;
   client_secret: string;
   identity: string;
-  password: string;
+  password?: string;
 }
 
 export const AuthenticateDTOSchema = z.object({
@@ -39,6 +39,7 @@ export interface CreateTokenDTO {
   client_secret: string;
   identity: string;
   password?: string;
+  fingerprints?: string[];
 }
 
 export const CreateTokenDTOSchema = z.object({
@@ -62,11 +63,16 @@ export const CreateTokenDTOSchema = z.object({
   }).optional().refine(val => val === undefined || val.trim() !== '', {
     message: "password cannot be empty",
   }),
+
+  fingerprints: z.array(z.string({
+    invalid_type_error: "each fingerprint must be a string",
+  })).optional(),
 });
 
 export interface CreateMFATokenDTO {
   challenge_id: string;
   mfa_code: string;
+  fingerprints?: string[];
 }
 
 export const CreateMFATokenDTOSchema = z.object({
@@ -79,6 +85,10 @@ export const CreateMFATokenDTOSchema = z.object({
     required_error: "mfa_code is required",
     invalid_type_error: "mfa_code must be a string"
   }).min(1, "mfa_code cannot be empty"),
+
+  fingerprints: z.array(z.string({
+    invalid_type_error: "each fingerprint must be a string",
+  })).optional(),
 });
 
 export interface DidCreateTokenDTO {
@@ -88,6 +98,8 @@ export interface DidCreateTokenDTO {
 
 export interface RefreshTokenDTO {
   refresh_token: string;
+  fingerprints?: string[];
+  min_fingerprints_to_match?: number;
 }
 
 export const RefreshTokenDTOSchema = z.object({
@@ -95,6 +107,10 @@ export const RefreshTokenDTOSchema = z.object({
     required_error: "refresh_token is required",
     invalid_type_error: "refresh_token must be a string"
   }).min(1, "refresh_token cannot be empty"),
+
+  fingerprints: z.array(z.string({
+    invalid_type_error: "each fingerprint must be a string",
+  })).optional(),
 });
 
 export interface DidRefreshTokenDTO {
