@@ -1,10 +1,6 @@
 import { z } from 'zod';
 
-export interface RoleEntityDTO {
-  id: string;
-  name: string;
-  permissions: string[];
-}
+import { RoleEntityDTO } from './role.dto';
 
 export interface UserEntityDTO {
   id: string;

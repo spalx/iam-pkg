@@ -12,3 +12,11 @@ export enum UserAction {
   UpdateUser = 'iam.user.updateUser',
   DeleteUser = 'iam.user.deleteUser',
 }
+
+export enum RoleAction {
+  GetRoles = 'iam.role.getRoles',
+  GetRole = 'iam.role.getRole',
+  CreateRole = 'iam.role.createRole',
+  UpdateRole = 'iam.role.updateRole',
+  DeleteRole = 'iam.role.deleteRole',
+}
