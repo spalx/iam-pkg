@@ -1,23 +1,11 @@
 import { z } from 'zod';
 
 export interface AuthenticateDTO {
-  client_id: string;
-  client_secret: string;
   identity: string;
   password?: string;
 }
 
 export const AuthenticateDTOSchema = z.object({
-  client_id: z.string({
-    required_error: "client_id is required",
-    invalid_type_error: "client_id must be a string"
-  }).min(1, "client_id cannot be empty"),
-
-  client_secret: z.string({
-    required_error: "client_secret is required",
-    invalid_type_error: "client_secret must be a string"
-  }).min(1, "client_secret cannot be empty"),
-
   identity: z.string({
     required_error: "identity is required",
     invalid_type_error: "identity must be a string"
@@ -35,24 +23,12 @@ export interface DidAuthenticateDTO {
 }
 
 export interface CreateTokenDTO {
-  client_id: string;
-  client_secret: string;
   identity: string;
   password?: string;
   fingerprints?: string[];
 }
 
 export const CreateTokenDTOSchema = z.object({
-  client_id: z.string({
-    required_error: "client_id is required",
-    invalid_type_error: "client_id must be a string"
-  }).min(1, "client_id cannot be empty"),
-
-  client_secret: z.string({
-    required_error: "client_secret is required",
-    invalid_type_error: "client_secret must be a string"
-  }).min(1, "client_secret cannot be empty"),
-
   identity: z.string({
     required_error: "identity is required",
     invalid_type_error: "identity must be a string"

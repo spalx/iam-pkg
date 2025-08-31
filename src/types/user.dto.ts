@@ -9,3 +9,12 @@ export interface UserEntityDTO {
   roles: RoleEntityDTO[];
   meta: Record<string, unknown>;
 }
+
+export interface CreateUserDTO {
+  identities: string[];
+  password?: string;
+  mfa_enabled?: boolean;
+  is_active?: boolean;
+  roles: string[];
+  meta?: Record<string, unknown>;
+}
