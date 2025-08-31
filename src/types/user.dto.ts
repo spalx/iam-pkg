@@ -1,3 +1,5 @@
+import { z } from 'zod';
+
 export interface RoleEntityDTO {
   id: string;
   name: string;
