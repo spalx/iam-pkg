@@ -64,3 +64,14 @@ export const GetUserDTOSchema = z.union([
     id: z.never().optional(),
   }),
 ]);
+
+export interface DeleteUserDTO {
+  id: string;
+}
+
+export const DeleteUserDTOSchema = z.object([
+  id: z.string({
+    required_error: "id is required",
+    invalid_type_error: "id must be a string"
+  }).min(1, "id cannot be empty"),
+]);
