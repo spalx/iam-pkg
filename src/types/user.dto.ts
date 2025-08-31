@@ -48,3 +48,19 @@ export const CreateUserDTOSchema = z.object({
     invalid_type_error: "meta must be an object",
   }).optional(),
 });
+
+export interface GetUserDTO {
+  id?: string;
+  identity?: string;
+}
+
+export const GetUserDTOSchema = z.union([
+  z.object({
+    id: z.string().min(1, "id cannot be empty"),
+    identity: z.never().optional(),
+  }),
+  z.object({
+    identity: z.string().min(1, "identity cannot be empty"),
+    id: z.never().optional(),
+  }),
+]);
