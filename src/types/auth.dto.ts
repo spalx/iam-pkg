@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { exportJWK } from "jose";
+import { exportJWK } from 'jose';
 
 type JoseJWK = Awaited<ReturnType<typeof exportJWK>>;
 

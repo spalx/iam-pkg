@@ -1,6 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
+import { jwtVerify, createLocalJWKSet, errors } from 'jose';
 import { CorrelatedResponseDTO, TransportAwareService, transportService } from 'transport-pkg';
-import { throwErrorForStatus } from 'rest-pkg';
+import { throwErrorForStatus, UnauthorizedError, ForbiddenError } from 'rest-pkg';
 import { IAppPkg, AppRunPriority } from 'app-life-cycle-pkg';
 
 import {
@@ -12,17 +13,21 @@ import {
   RefreshTokenDTO,
   DidRefreshTokenDTO,
   RevokeTokenDTO,
-  DidRevokeTokenDTO
+  DidRevokeTokenDTO,
+  GetJWKSDTO,
+  DidGetJWKSDTO
 } from '../types/auth.dto';
-import { AuthAction } from '../common/constants';
+import { UserEntityDTO } from '../types/user.dto';
+import { AuthAction, JWT_KEY_ALGORITHM } from '../common/constants';
 
 class AuthService extends TransportAwareService implements IAppPkg {
-  private refreshTokenRetrieveCallback: ((accessToken: string) => Promise<string>) | null = null;
-  private refreshTokenStoreCallback: ((userId: string, refreshToken: string) => Promise<void>) | null = null;
-  private refreshTokenEncryptionKey: string = '';
+  private accessToken: string = '';
+  private user: UserEntityDTO | null = null;
+  private jwks = null;
 
   async init(): Promise<void> {
     transportService.transportsSend([
+      AuthAction.GetJWKS,
       AuthAction.Authenticate,
       AuthAction.CreateToken,
       AuthAction.RefreshToken,
@@ -35,17 +40,35 @@ class AuthService extends TransportAwareService implements IAppPkg {
   }
 
   async setAccessToken(accessToken: string): Promise<void> {
-    //TODO
-    // When doing this, it must validate (verify) the access token. If expired, use the refresh token source to refresh the token.
+    const jwks = this.jwks ?? createLocalJWKSet(
+      await this.getJWKS({})
+    );
+
+    try {
+      const { payload } = await jwtVerify(accessToken, jwks, {
+        algorithms: [JWT_KEY_ALGORITHM],
+      });
+
+      if (payload.user) {
+        this.user = payload.user as UserEntityDTO;
+        this.accessToken = accessToken;
+      } else {
+        throw new ForbiddenError('Invalid token');
+      }
+    } catch (err) {
+      this.user = null;
+      this.accessToken = '';
+
+      if (err instanceof errors.JWTExpired) {
+        throw new UnauthorizedError('Token expired');
+      }
+
+      throw new ForbiddenError('Invalid token');
+    }
   }
 
-  setRefreshTokenRetrieveCallback(callback: (accessToken: string) => Promise<string>): void {
-    this.refreshTokenRetrieveCallback = callback;
-  }
-
-  setRefreshTokenStoreCallback(encryptionKey: string, callback: (userId: string, refreshToken: string) => Promise<void>): void {
-    this.refreshTokenStoreCallback = callback;
-    this.refreshTokenEncryptionKey = encryptionKey;
+  async getJWKS(data: GetJWKSDTO, correlationId?: string): Promise<DidGetJWKSDTO> {
+    return (await this.sendActionViaTransport(AuthAction.GetJWKS, data, correlationId) as DidGetJWKSDTO);
   }
 
   async authenticate(data: AuthenticateDTO, correlationId?: string): Promise<DidAuthenticateDTO> {

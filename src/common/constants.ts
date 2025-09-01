@@ -1,4 +1,5 @@
 export enum AuthAction {
+  GetJWKS = 'iam.auth.getJWKS',
   Authenticate = 'iam.auth.authenticate',
   CreateToken = 'iam.auth.createToken',
   RefreshToken = 'iam.auth.refreshToken',
@@ -20,3 +21,5 @@ export enum RoleAction {
   UpdateRole = 'iam.role.updateRole',
   DeleteRole = 'iam.role.deleteRole',
 }
+
+export const JWT_KEY_ALGORITHM = 'ES256';
