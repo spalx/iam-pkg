@@ -71,3 +71,7 @@ export const DeleteRoleDTOSchema = z.object({
     invalid_type_error: "id must be a string"
   }).min(1, "id cannot be empty"),
 });
+
+export interface DidDeleteRoleDTO {
+  //
+}

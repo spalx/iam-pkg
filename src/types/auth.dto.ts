@@ -1,4 +1,21 @@
 import { z } from 'zod';
+import { exportJWK } from "jose";
+
+type JoseJWK = Awaited<ReturnType<typeof exportJWK>>;
+
+export interface JWKSKey extends JoseJWK {
+  kid: string;
+  alg: string;
+  use: 'sig';
+}
+
+export interface GetJWKSDTO {
+  //
+}
+
+export interface DidGetJWKSDTO {
+  keys: JWKSKey[];
+}
 
 export interface AuthenticateDTO {
   identity: string;
