@@ -29,9 +29,10 @@ export const AuthenticateDTOSchema = z.object({
   }).min(1, "identity cannot be empty"),
 
   password: z.string({
-    required_error: "password is required",
     invalid_type_error: "password must be a string"
-  }).min(1, "password cannot be empty"),
+  }).optional().refine(val => val === undefined || val.trim() !== '', {
+    message: "password cannot be empty",
+  }),
 });
 
 export interface DidAuthenticateDTO {
