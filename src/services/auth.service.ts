@@ -107,6 +107,7 @@ class AuthService extends TransportAwareService implements IAppPkg {
         this.getUserAgentFromRequest(request)
       ].filter(Boolean);
       data.fingerprints = fingerprints;
+      data.min_fingerprints_to_match = 2;
     }
 
     return (await this.sendActionViaTransport(AuthAction.RefreshToken, data, correlationId) as DidRefreshTokenDTO);
