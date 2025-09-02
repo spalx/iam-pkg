@@ -67,6 +67,10 @@ class AuthService extends TransportAwareService implements IAppPkg {
     }
   }
 
+  getCurrentUser(): UserEntityDTO | null {
+    return this.user;
+  }
+
   can(permissions: string[], requireAll: boolean = true): boolean {
     if (!this.user?.roles) {
       return false;
