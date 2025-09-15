@@ -1,8 +1,8 @@
 import type { IncomingMessage } from 'http';
 import { v4 as uuidv4 } from 'uuid';
 import { jwtVerify, createLocalJWKSet, errors } from 'jose';
-import { CorrelatedResponseDTO, TransportAwareService, transportService } from 'transport-pkg';
-import { throwErrorForStatus, UnauthorizedError, ForbiddenError } from 'rest-pkg';
+import { CorrelatedMessage, TransportAwareService, transportService, TransportAdapterName } from 'transport-pkg';
+import { UnauthorizedError, ForbiddenError } from 'rest-pkg';
 import { IAppPkg, AppRunPriority } from 'app-life-cycle-pkg';
 
 import {
@@ -14,7 +14,6 @@ import {
   RefreshTokenDTO,
   DidRefreshTokenDTO,
   RevokeTokenDTO,
-  DidRevokeTokenDTO,
   DidGetJWKSDTO
 } from '../types/auth.dto';
 import { UserEntityDTO } from '../types/user.dto';
@@ -26,13 +25,8 @@ class AuthService extends TransportAwareService implements IAppPkg {
   private jwks = null;
 
   async init(): Promise<void> {
-    transportService.transportsSend([
-      AuthAction.GetJWKS,
-      AuthAction.Authenticate,
-      AuthAction.CreateToken,
-      AuthAction.RefreshToken,
-      AuthAction.RevokeToken
-    ]);
+    //TODO: use service-discovery here
+    this.useTransport(TransportAdapterName.HTTP, { host: 'iam', port: 3030 });
   }
 
   getPriority(): number {
@@ -117,25 +111,19 @@ class AuthService extends TransportAwareService implements IAppPkg {
     return (await this.sendActionViaTransport(AuthAction.RefreshToken, data, correlationId) as DidRefreshTokenDTO);
   }
 
-  async revokeToken(data: RevokeTokenDTO, correlationId?: string): Promise<DidRevokeTokenDTO> {
-    return (await this.sendActionViaTransport(AuthAction.RevokeToken, data, correlationId) as DidRevokeTokenDTO);
+  async revokeToken(data: RevokeTokenDTO, correlationId?: string): Promise<void> {
+    await this.sendActionViaTransport(AuthAction.RevokeToken, data, correlationId);
   }
 
   private async sendActionViaTransport(action: AuthAction, data: object, correlationId?: string): Promise<object> {
-    const response: CorrelatedResponseDTO = await transportService.send(
-      {
-        action,
-        data,
-        correlation_id: correlationId || uuidv4(),
-        transport_name: this.getActiveTransport()
-      },
-      this.getActiveTransportOptions()
+    const message: CorrelatedMessage = CorrelatedMessage.create(
+      correlationId || uuidv4(),
+      action,
+      this.getActiveTransport(),
+      data
     );
 
-    if (response.status !== 0) {
-      throwErrorForStatus(response.status, response.error || '');
-    }
-
+    const response: CorrelatedMessage = await transportService.send(message, this.getActiveTransportOptions());
     return response.data;
   }
 

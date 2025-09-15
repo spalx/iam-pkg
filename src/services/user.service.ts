@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
-import { CorrelatedResponseDTO, TransportAwareService, transportService } from 'transport-pkg';
-import { throwErrorForStatus, GetAllRestQueryParams, GetAllRestPaginatedResponse } from 'rest-pkg';
+import { CorrelatedMessage, TransportAwareService, transportService, TransportAdapterName } from 'transport-pkg';
+import { GetAllRestQueryParams, GetAllRestPaginatedResponse } from 'rest-pkg';
 import { IAppPkg, AppRunPriority } from 'app-life-cycle-pkg';
 
 import {
@@ -8,20 +8,14 @@ import {
   UserEntityDTO,
   CreateUserDTO,
   UpdateUserDTO,
-  DeleteUserDTO,
-  DidDeleteUserDTO
+  DeleteUserDTO
 } from '../types/user.dto';
 import { UserAction } from '../common/constants';
 
 class UserService extends TransportAwareService implements IAppPkg {
   async init(): Promise<void> {
-    transportService.transportsSend([
-      UserAction.GetUser,
-      UserAction.GetUsers,
-      UserAction.CreateUser,
-      UserAction.UpdateUser,
-      UserAction.DeleteUser
-    ]);
+    //TODO: use service-discovery here
+    this.useTransport(TransportAdapterName.HTTP, { host: 'iam', port: 3030 });
   }
 
   getPriority(): number {
@@ -44,25 +38,19 @@ class UserService extends TransportAwareService implements IAppPkg {
     return (await this.sendActionViaTransport(UserAction.UpdateUser, data, correlationId) as UserEntityDTO);
   }
 
-  async deleteUser(data: DeleteUserDTO, correlationId?: string): Promise<DidDeleteUserDTO> {
-    return (await this.sendActionViaTransport(UserAction.DeleteUser, data, correlationId) as DidDeleteUserDTO);
+  async deleteUser(data: DeleteUserDTO, correlationId?: string): Promise<void> {
+    await this.sendActionViaTransport(UserAction.DeleteUser, data, correlationId);
   }
 
   private async sendActionViaTransport(action: UserAction, data: object, correlationId?: string): Promise<object> {
-    const response: CorrelatedResponseDTO = await transportService.send(
-      {
-        action,
-        data,
-        correlation_id: correlationId || uuidv4(),
-        transport_name: this.getActiveTransport()
-      },
-      this.getActiveTransportOptions()
+    const message: CorrelatedMessage = CorrelatedMessage.create(
+      correlationId || uuidv4(),
+      action,
+      this.getActiveTransport(),
+      data
     );
 
-    if (response.status !== 0) {
-      throwErrorForStatus(response.status, response.error || '');
-    }
-
+    const response: CorrelatedMessage = await transportService.send(message, this.getActiveTransportOptions());
     return response.data;
   }
 }
