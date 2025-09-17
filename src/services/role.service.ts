@@ -2,6 +2,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { CorrelatedMessage, TransportAwareService, transportService, TransportAdapterName } from 'transport-pkg';
 import { GetAllRestQueryParams, GetAllRestPaginatedResponse } from 'rest-pkg';
 import { IAppPkg, AppRunPriority } from 'app-life-cycle-pkg';
+import { serviceDiscoveryService, ServiceDTO } from 'service-discovery-pkg';
 
 import {
   GetRoleDTO,
@@ -10,12 +11,13 @@ import {
   UpdateRoleDTO,
   DeleteRoleDTO
 } from '../types/role.dto';
-import { RoleAction } from '../common/constants';
+import { RoleAction, SERVICE_NAME } from '../common/constants';
 
 class RoleService extends TransportAwareService implements IAppPkg {
   async init(): Promise<void> {
-    //TODO: use service-discovery here
-    this.useTransport(TransportAdapterName.HTTP, { host: 'iam', port: 3030 });
+    const service: ServiceDTO = await serviceDiscoveryService.getService(SERVICE_NAME);
+
+    this.useTransport(TransportAdapterName.HTTP, { host: service.host, port: service.port });
   }
 
   getPriority(): number {

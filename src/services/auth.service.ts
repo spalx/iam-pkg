@@ -4,6 +4,7 @@ import { jwtVerify, createLocalJWKSet, errors } from 'jose';
 import { CorrelatedMessage, TransportAwareService, transportService, TransportAdapterName } from 'transport-pkg';
 import { UnauthorizedError, ForbiddenError } from 'rest-pkg';
 import { IAppPkg, AppRunPriority } from 'app-life-cycle-pkg';
+import { serviceDiscoveryService, ServiceDTO } from 'service-discovery-pkg';
 
 import {
   AuthenticateDTO,
@@ -17,7 +18,7 @@ import {
   DidGetJWKSDTO
 } from '../types/auth.dto';
 import { UserEntityDTO } from '../types/user.dto';
-import { AuthAction, JWT_KEY_ALGORITHM } from '../common/constants';
+import { AuthAction, JWT_KEY_ALGORITHM, SERVICE_NAME } from '../common/constants';
 
 class AuthService extends TransportAwareService implements IAppPkg {
   private accessToken: string = '';
@@ -25,8 +26,9 @@ class AuthService extends TransportAwareService implements IAppPkg {
   private jwks = null;
 
   async init(): Promise<void> {
-    //TODO: use service-discovery here
-    this.useTransport(TransportAdapterName.HTTP, { host: 'iam', port: 3030 });
+    const service: ServiceDTO = await serviceDiscoveryService.getService(SERVICE_NAME);
+
+    this.useTransport(TransportAdapterName.HTTP, { host: service.host, port: service.port });
   }
 
   getPriority(): number {

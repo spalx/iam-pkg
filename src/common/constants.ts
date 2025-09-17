@@ -23,3 +23,5 @@ export enum RoleAction {
 }
 
 export const JWT_KEY_ALGORITHM = 'ES256';
+
+export const SERVICE_NAME = 'iam';

@@ -1,6 +1,6 @@
 {
   "name": "iam-pkg",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
@@ -10,6 +10,7 @@
     "app-life-cycle-pkg": "git+git@github.com:spalx/app-life-cycle-pkg.git#1.0.5",
     "jose": "^6.1.0",
     "rest-pkg": "git+git@github.com:spalx/rest-pkg.git#1.0.3",
+    "service-discovery-pkg": "git+git@github.com:spalx/service-discovery-pkg.git#1.0.1",
     "transport-pkg": "git+git@github.com:spalx/transport-pkg.git#1.1.5",
     "uuid": "^11.0.5",
     "zod": "^3.25.49"
