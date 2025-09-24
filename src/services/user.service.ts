@@ -21,7 +21,7 @@ class UserService extends TransportAwareService implements IAppPkg {
   }
 
   getPriority(): number {
-    return AppRunPriority.Highest;
+    return AppRunPriority.Medium;
   }
 
   async getUser(data: GetUserDTO, correlationId?: string): Promise<UserEntityDTO> {

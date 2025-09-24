@@ -32,7 +32,7 @@ class AuthService extends TransportAwareService implements IAppPkg {
   }
 
   getPriority(): number {
-    return AppRunPriority.Highest;
+    return AppRunPriority.Medium;
   }
 
   async setAccessToken(accessToken: string): Promise<void> {

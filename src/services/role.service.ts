@@ -21,7 +21,7 @@ class RoleService extends TransportAwareService implements IAppPkg {
   }
 
   getPriority(): number {
-    return AppRunPriority.Highest;
+    return AppRunPriority.Medium;
   }
 
   async getRole(data: GetRoleDTO, correlationId?: string): Promise<RoleEntityDTO> {
