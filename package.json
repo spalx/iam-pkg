@@ -1,17 +1,17 @@
 {
   "name": "iam-pkg",
-  "version": "1.2.5",
+  "version": "1.2.6",
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
     "prepare": "npm run build"
   },
   "dependencies": {
-    "app-life-cycle-pkg": "git+git@github.com:spalx/app-life-cycle-pkg.git#1.0.5",
+    "app-life-cycle-pkg": "git+git@github.com:spalx/app-life-cycle-pkg.git#1.0.6",
     "jose": "^6.1.0",
     "rest-pkg": "git+git@github.com:spalx/rest-pkg.git#1.0.3",
-    "service-discovery-pkg": "git+git@github.com:spalx/service-discovery-pkg.git#1.0.1",
-    "transport-pkg": "git+git@github.com:spalx/transport-pkg.git#1.1.5",
+    "service-discovery-pkg": "git+git@github.com:spalx/service-discovery-pkg.git#1.0.2",
+    "transport-pkg": "git+git@github.com:spalx/transport-pkg.git#1.1.6",
     "uuid": "^13.0.0",
     "zod": "^3.25.49"
   },

@@ -35,6 +35,17 @@ class AuthService extends TransportAwareService implements IAppPkg {
     return AppRunPriority.Medium;
   }
 
+  getName(): string {
+    return 'iam-auth';
+  }
+
+  getDependencies(): IAppPkg[] {
+    return [
+      transportService,
+      serviceDiscoveryService
+    ];
+  }
+
   async setAccessToken(accessToken: string): Promise<void> {
     const jwks = this.jwks ?? createLocalJWKSet(
       await this.getJWKS()

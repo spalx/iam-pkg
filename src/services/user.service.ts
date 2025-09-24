@@ -24,6 +24,17 @@ class UserService extends TransportAwareService implements IAppPkg {
     return AppRunPriority.Medium;
   }
 
+  getName(): string {
+    return 'iam-user';
+  }
+
+  getDependencies(): IAppPkg[] {
+    return [
+      transportService,
+      serviceDiscoveryService
+    ];
+  }
+
   async getUser(data: GetUserDTO, correlationId?: string): Promise<UserEntityDTO> {
     return (await this.sendActionViaTransport(UserAction.GetUser, data, correlationId) as UserEntityDTO);
   }

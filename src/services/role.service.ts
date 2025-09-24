@@ -24,6 +24,17 @@ class RoleService extends TransportAwareService implements IAppPkg {
     return AppRunPriority.Medium;
   }
 
+  getName(): string {
+    return 'iam-role';
+  }
+
+  getDependencies(): IAppPkg[] {
+    return [
+      transportService,
+      serviceDiscoveryService
+    ];
+  }
+
   async getRole(data: GetRoleDTO, correlationId?: string): Promise<RoleEntityDTO> {
     return (await this.sendActionViaTransport(RoleAction.GetRole, data, correlationId) as RoleEntityDTO);
   }
