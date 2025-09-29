@@ -1,7 +1,7 @@
 import type { IncomingMessage } from 'http';
 import { v4 as uuidv4 } from 'uuid';
 import { jwtVerify, createLocalJWKSet, errors } from 'jose';
-import { CorrelatedMessage, TransportAwareService, transportService, TransportAdapterName } from 'transport-pkg';
+import { CorrelatedMessage, TransportAwareService, transportService, TransportAdapterName, CircuitBreaker } from 'transport-pkg';
 import { UnauthorizedError, ForbiddenError } from 'rest-pkg';
 import { IAppPkg, AppRunPriority } from 'app-life-cycle-pkg';
 import { serviceDiscoveryService, ServiceDTO } from 'service-discovery-pkg';
@@ -24,6 +24,20 @@ class AuthService extends TransportAwareService implements IAppPkg {
   private accessToken: string = '';
   private user: UserEntityDTO | null = null;
   private jwks = null;
+  private sendBreaker: CircuitBreaker<[CorrelatedMessage, Record<string, unknown>], CorrelatedMessage>;
+
+  constructor() {
+    super();
+
+    this.sendBreaker = new CircuitBreaker<[CorrelatedMessage, Record<string, unknown>], CorrelatedMessage>(
+      (req, options) => transportService.send(req, options),
+      {
+        timeout: 2000,
+        errorThresholdPercentage: 50,
+        retryTimeout: 5000,
+      }
+    );
+  }
 
   async init(): Promise<void> {
     const service: ServiceDTO = await serviceDiscoveryService.getService(SERVICE_NAME);
@@ -136,7 +150,7 @@ class AuthService extends TransportAwareService implements IAppPkg {
       data
     );
 
-    const response: CorrelatedMessage = await transportService.send(message, this.getActiveTransportOptions());
+    const response: CorrelatedMessage = await this.sendBreaker.exec(message, this.getActiveTransportOptions());
     return response.data;
   }
 
