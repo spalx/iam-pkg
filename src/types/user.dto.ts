@@ -18,31 +18,12 @@ export interface CreateUserDTO {
 }
 
 export const CreateUserDTOSchema = z.object({
-  identities: z.array(z.string({
-    invalid_type_error: "each identity must be a string",
-  })).min(1, { message: "identities is required" }),
-
-  password: z.string({
-    invalid_type_error: "password must be a string"
-  }).optional().refine(val => val === undefined || val.trim() !== '', {
-    message: "password cannot be empty",
-  }),
-
-  mfa_enabled: z.boolean({
-    invalid_type_error: "mfa_enabled must be a boolean",
-  }).optional(),
-
-  is_active: z.boolean({
-    invalid_type_error: "is_active must be a boolean",
-  }).optional(),
-
-  roles: z.array(z.string({
-    invalid_type_error: "each role must be a string",
-  })).min(1, { message: "roles is required" }),
-
-  meta: z.record(z.unknown(), {
-    invalid_type_error: "meta must be an object",
-  }).optional(),
+  identities: z.array(z.string('each identity must be a string').min(1, 'each identity cannot be empty'), 'identities must be an array').min(1, 'identities cannot be empty'),
+  password: z.string('password must be a string').optional(),
+  mfa_enabled: z.boolean('mfa_enabled must be a boolean').optional(),
+  is_active: z.boolean('is_active must be a boolean').optional(),
+  roles: z.array(z.string('each role must be a string').min(1, 'each role cannot be empty'), 'roles must be an array').min(1, 'roles cannot be empty'),
+  meta: z.record(z.string(), z.unknown(), 'meta must be an object').optional(),
 });
 
 export interface UpdateUserDTO {
@@ -56,36 +37,13 @@ export interface UpdateUserDTO {
 }
 
 export const UpdateUserDTOSchema = z.object({
-  id: z.string({
-    required_error: "id is required",
-    invalid_type_error: "id must be a string"
-  }).min(1, "id cannot be empty"),
-
-  identities: z.array(z.string({
-    invalid_type_error: "each identity must be a string",
-  })).optional(),
-
-  password: z.string({
-    invalid_type_error: "password must be a string"
-  }).optional().refine(val => val === undefined || val.trim() !== '', {
-    message: "password cannot be empty",
-  }),
-
-  mfa_enabled: z.boolean({
-    invalid_type_error: "mfa_enabled must be a boolean",
-  }).optional(),
-
-  is_active: z.boolean({
-    invalid_type_error: "is_active must be a boolean",
-  }).optional(),
-
-  roles: z.array(z.string({
-    invalid_type_error: "each role must be a string",
-  })).optional(),
-
-  meta: z.record(z.unknown(), {
-    invalid_type_error: "meta must be an object",
-  }).optional(),
+  id: z.uuidv4('id must be in uuid4 format'),
+  identities: z.array(z.string('each identity must be a string').min(1, 'each identity cannot be empty'), 'identities must be an array').optional(),
+  password: z.string('password must be a string').optional(),
+  mfa_enabled: z.boolean('mfa_enabled must be a boolean').optional(),
+  is_active: z.boolean('is_active must be a boolean').optional(),
+  roles: z.array(z.string('each role must be a string').min(1, 'each role cannot be empty'), 'roles must be an array').optional(),
+  meta: z.record(z.string(), z.unknown(), 'meta must be an object').optional(),
 });
 
 export interface GetUserDTO {
@@ -95,11 +53,11 @@ export interface GetUserDTO {
 
 export const GetUserDTOSchema = z.union([
   z.object({
-    id: z.string().min(1, "id cannot be empty"),
+    id: z.uuidv4('id must be in uuid4 format'),
     identity: z.never().optional(),
   }),
   z.object({
-    identity: z.string().min(1, "identity cannot be empty"),
+    identity: z.string().min(1, 'identity cannot be empty'),
     id: z.never().optional(),
   }),
 ]);
@@ -109,8 +67,5 @@ export interface DeleteUserDTO {
 }
 
 export const DeleteUserDTOSchema = z.object({
-  id: z.string({
-    required_error: "id is required",
-    invalid_type_error: "id must be a string"
-  }).min(1, "id cannot be empty"),
+  id: z.uuidv4('id must be in uuid4 format'),
 });

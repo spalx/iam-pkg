@@ -12,14 +12,8 @@ export interface CreateRoleDTO {
 }
 
 export const CreateRoleDTOSchema = z.object({
-  name: z.string({
-    required_error: "name is required",
-    invalid_type_error: "name must be a string"
-  }).min(1, "name cannot be empty"),
-
-  permissions: z.array(z.string({
-    invalid_type_error: "each permission must be a string",
-  })).min(1, { message: "permissions is required" }),
+  name: z.string('name must be a string').min(1, 'name cannot be empty'),
+  permissions: z.array(z.string('each permission must be a string').min(1, 'each permission cannot be empty'), 'permissions must be an array').min(1, 'permissions cannot be empty'),
 });
 
 export interface UpdateRoleDTO {
@@ -29,20 +23,9 @@ export interface UpdateRoleDTO {
 }
 
 export const UpdateRoleDTOSchema = z.object({
-  id: z.string({
-    required_error: "id is required",
-    invalid_type_error: "id must be a string"
-  }).min(1, "id cannot be empty"),
-
-  name: z.string({
-    invalid_type_error: "name must be a string"
-  }).optional().refine(val => val === undefined || val.trim() !== '', {
-    message: "name cannot be empty",
-  }),
-
-  permissions: z.array(z.string({
-    invalid_type_error: "each identity must be a string",
-  })).optional(),
+  id: z.uuidv4('id must be in uuid4 format'),
+  name: z.string('name must be a string').optional(),
+  permissions: z.array(z.string('each permission must be a string').min(1, 'each permission cannot be empty'), 'permissions must be an array').optional(),
 });
 
 export interface GetRoleDTO {
@@ -52,11 +35,11 @@ export interface GetRoleDTO {
 
 export const GetRoleDTOSchema = z.union([
   z.object({
-    id: z.string().min(1, "id cannot be empty"),
+    id: z.uuidv4('id must be in uuid4 format'),
     name: z.never().optional(),
   }),
   z.object({
-    name: z.string().min(1, "name cannot be empty"),
+    name: z.string().min(1, 'name cannot be empty'),
     id: z.never().optional(),
   }),
 ]);
@@ -66,8 +49,5 @@ export interface DeleteRoleDTO {
 }
 
 export const DeleteRoleDTOSchema = z.object({
-  id: z.string({
-    required_error: "id is required",
-    invalid_type_error: "id must be a string"
-  }).min(1, "id cannot be empty"),
+  id: z.uuidv4('id must be in uuid4 format'),
 });
