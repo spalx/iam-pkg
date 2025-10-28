@@ -1,6 +1,6 @@
 import type { IncomingMessage } from 'http';
 import { v4 as uuidv4 } from 'uuid';
-import { jwtVerify, createLocalJWKSet, errors } from 'jose';
+import { jwtVerify, createLocalJWKSet, errors, JWTPayload } from 'jose';
 import { CorrelatedMessage, TransportAwareService, transportService, TransportAdapterName, CircuitBreaker } from 'transport-pkg';
 import { UnauthorizedError, ForbiddenError } from 'rest-pkg';
 import { IAppPkg, AppRunPriority } from 'app-life-cycle-pkg';
@@ -60,22 +60,24 @@ class AuthService extends TransportAwareService implements IAppPkg {
     ];
   }
 
-  async setAccessToken(accessToken: string): Promise<void> {
-    const jwks = this.jwks ?? createLocalJWKSet(
-      await this.getJWKS()
-    );
-
+  async getUserFromToken(accessToken: string): Promise<UserEntityDTO | null> {
     try {
-      const { payload } = await jwtVerify(accessToken, jwks, {
-        algorithms: [JWT_KEY_ALGORITHM],
-      });
-
-      if (payload.user) {
-        this.user = payload.user as UserEntityDTO;
-        this.accessToken = accessToken;
-      } else {
-        throw new ForbiddenError('Invalid token');
+      const payload = await this.parseJwtToken(accessToken);
+      return payload.user as UserEntityDTO ?? null;
+    } catch (err) {
+      if (err instanceof errors.JWTExpired) {
+        return err.payload.user as UserEntityDTO;
       }
+
+      return null;
+    }
+  }
+
+  async setAccessToken(accessToken: string): Promise<void> {
+    try {
+      const payload = await this.parseJwtToken(accessToken);
+      this.user = payload.user as UserEntityDTO;
+      this.accessToken = accessToken;
     } catch (err) {
       this.user = null;
       this.accessToken = '';
@@ -93,11 +95,23 @@ class AuthService extends TransportAwareService implements IAppPkg {
   }
 
   can(permissions: string[], requireAll: boolean = true): boolean {
-    if (!this.user?.roles) {
+    if (!this.user) {
       return false;
     }
 
-    return this.user.roles.some(role => {
+    return this.canUser(this.user, permissions, requireAll);
+  }
+
+  canUser(user: UserEntityDTO, permissions: string[], requireAll: boolean = true): boolean {
+    if (!permissions.length) {
+      return true;
+    }
+
+    if (!user.roles) {
+      return false;
+    }
+
+    return user.roles.some(role => {
       const rolePerms = role.permissions;
       return requireAll
         ? permissions.every(p => rolePerms.includes(p)) // All permissions must exist
@@ -140,6 +154,16 @@ class AuthService extends TransportAwareService implements IAppPkg {
 
   async revokeToken(data: RevokeTokenDTO, correlationId?: string): Promise<void> {
     await this.sendActionViaTransport(AuthAction.RevokeToken, data, correlationId);
+  }
+
+  private async parseJwtToken(jwt: string): Promise<JWTPayload> {
+    const jwks = this.jwks ?? createLocalJWKSet(await this.getJWKS());
+
+    const { payload } = await jwtVerify(jwt, jwks, {
+      algorithms: [JWT_KEY_ALGORITHM],
+    });
+
+    return payload;
   }
 
   private async sendActionViaTransport(action: AuthAction, data: object, correlationId?: string): Promise<object> {
