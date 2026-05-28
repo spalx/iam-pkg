@@ -72,7 +72,7 @@ class RoleService extends TransportAwareService implements IAppPkg {
   }
 
   async deleteRoles(data: DeleteRolesDTO, correlationId?: string): Promise<void> {
-    await this.sendActionViaTransport(RoleAction.DeleteRole, data, correlationId);
+    await this.sendActionViaTransport(RoleAction.DeleteRoles, data, correlationId);
   }
 
   private async sendActionViaTransport(action: RoleAction, data: object, correlationId?: string): Promise<object> {

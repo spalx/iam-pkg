@@ -20,6 +20,7 @@ export enum RoleAction {
   CreateRole = 'iam.role.createRole',
   UpdateRole = 'iam.role.updateRole',
   DeleteRole = 'iam.role.deleteRole',
+  DeleteRoles = 'iam.role.deleteRoles',
 }
 
 export const JWT_KEY_ALGORITHM = 'ES256';
