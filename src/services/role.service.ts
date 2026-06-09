@@ -1,8 +1,8 @@
 import { v4 as uuidv4 } from 'uuid';
-import { CorrelatedMessage, TransportAwareService, transportService, TransportAdapterName, CircuitBreaker } from 'transport-pkg';
-import { GetAllRestQueryParams, GetAllRestPaginatedResponse } from 'rest-pkg';
-import { IAppPkg, AppRunPriority } from 'app-life-cycle-pkg';
-import { serviceDiscoveryService, ServiceDTO } from 'service-discovery-pkg';
+import { CorrelatedMessage, TransportAwareService, transportService, TransportAdapterName, CircuitBreaker } from '@spalx/transport-pkg';
+import { GetAllRestQueryParams, GetAllRestPaginatedResponse } from '@spalx/rest-pkg';
+import { IAppPkg, AppRunPriority } from '@spalx/app-life-cycle-pkg';
+import { serviceDiscoveryService, ServiceDTO } from '@spalx/service-discovery-pkg';
 
 import {
   GetRoleDTO,
