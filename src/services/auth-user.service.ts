@@ -46,10 +46,10 @@ class AuthUserService {
       return false;
     }
 
-    return this.canUser(this.user, permissions, requireAll);
+    return AuthUserService.canUser(this.user, permissions, requireAll);
   }
 
-  canUser(user: UserEntityDTO, permissions: string[], requireAll: boolean = true): boolean {
+  static canUser(user: UserEntityDTO, permissions: string[], requireAll: boolean = true): boolean {
     if (!permissions.length) {
       return true;
     }
