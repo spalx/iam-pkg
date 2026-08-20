@@ -1,8 +1,6 @@
 import type { IncomingMessage } from 'http';
 import { v4 as uuidv4 } from 'uuid';
-import { jwtVerify, createLocalJWKSet, errors, JWTPayload } from 'jose';
 import { CorrelatedMessage, TransportAwareService, transportService, TransportAdapterName, CircuitBreaker } from '@spalx/transport-pkg';
-import { UnauthorizedError, ForbiddenError } from '@spalx/rest-pkg';
 import { IAppPkg, AppRunPriority } from '@spalx/app-life-cycle-pkg';
 import { serviceDiscoveryService, ServiceDTO } from '@spalx/service-discovery-pkg';
 
@@ -17,13 +15,9 @@ import {
   RevokeTokenDTO,
   DidGetJWKSDTO
 } from '../types/auth.dto';
-import { UserEntityDTO } from '../types/user.dto';
-import { AuthAction, JWT_KEY_ALGORITHM, SERVICE_NAME } from '../common/constants';
+import { AuthAction, SERVICE_NAME } from '../common/constants';
 
 class AuthService extends TransportAwareService implements IAppPkg {
-  private accessToken: string = '';
-  private user: UserEntityDTO | null = null;
-  private jwks = null;
   private sendBreaker: CircuitBreaker<[CorrelatedMessage, Record<string, unknown>], CorrelatedMessage>;
 
   constructor() {
@@ -58,65 +52,6 @@ class AuthService extends TransportAwareService implements IAppPkg {
       transportService,
       serviceDiscoveryService
     ];
-  }
-
-  async getUserFromToken(accessToken: string): Promise<UserEntityDTO | null> {
-    try {
-      const payload = await this.parseJwtToken(accessToken);
-      return payload.user as UserEntityDTO ?? null;
-    } catch (err) {
-      if (err instanceof errors.JWTExpired) {
-        return err.payload.user as UserEntityDTO;
-      }
-
-      return null;
-    }
-  }
-
-  async setAccessToken(accessToken: string): Promise<void> {
-    try {
-      const payload = await this.parseJwtToken(accessToken);
-      this.user = payload.user as UserEntityDTO;
-      this.accessToken = accessToken;
-    } catch (err) {
-      this.user = null;
-      this.accessToken = '';
-
-      if (err instanceof errors.JWTExpired) {
-        throw new UnauthorizedError('Token expired');
-      }
-
-      throw new ForbiddenError('Invalid token');
-    }
-  }
-
-  getCurrentUser(): UserEntityDTO | null {
-    return this.user;
-  }
-
-  can(permissions: string[], requireAll: boolean = true): boolean {
-    if (!this.user) {
-      return false;
-    }
-
-    return this.canUser(this.user, permissions, requireAll);
-  }
-
-  canUser(user: UserEntityDTO, permissions: string[], requireAll: boolean = true): boolean {
-    if (!permissions.length) {
-      return true;
-    }
-
-    if (!user.roles) {
-      return false;
-    }
-
-    return user.roles.some(role => {
-      const rolePerms = role.permissions;
-      return requireAll
-        ? permissions.every(p => rolePerms.includes(p)) // All permissions must exist
-        : permissions.some(p => rolePerms.includes(p)); // At least one permission
-    });
   }
 
   async getJWKS(correlationId?: string): Promise<DidGetJWKSDTO> {
@@ -154,16 +89,6 @@ class AuthService extends TransportAwareService implements IAppPkg {
 
   async revokeToken(data: RevokeTokenDTO, correlationId?: string): Promise<void> {
     await this.sendActionViaTransport(AuthAction.RevokeToken, data, correlationId);
-  }
-
-  private async parseJwtToken(jwt: string): Promise<JWTPayload> {
-    const jwks = this.jwks ?? createLocalJWKSet(await this.getJWKS());
-
-    const { payload } = await jwtVerify(jwt, jwks, {
-      algorithms: [JWT_KEY_ALGORITHM],
-    });
-
-    return payload;
   }
 
   private async sendActionViaTransport(action: AuthAction, data: object, correlationId?: string): Promise<object> {
