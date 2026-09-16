@@ -1,5 +1,5 @@
 import type { IncomingMessage } from 'http';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'crypto';
 import { CorrelatedMessage, TransportAwareService, transportService, TransportAdapterName, CircuitBreaker } from '@spalx/transport-pkg';
 import { IAppPkg, AppRunPriority } from '@spalx/app-life-cycle-pkg';
 import { serviceDiscoveryService, ServiceDTO } from '@spalx/service-discovery-pkg';
@@ -93,7 +93,7 @@ class AuthService extends TransportAwareService implements IAppPkg {
 
   private async sendActionViaTransport(action: AuthAction, data: object, correlationId?: string): Promise<object> {
     const message: CorrelatedMessage = CorrelatedMessage.create(
-      correlationId || uuidv4(),
+      correlationId || randomUUID(),
       action,
       this.getActiveTransport(),
       data
